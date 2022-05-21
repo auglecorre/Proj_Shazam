@@ -46,8 +46,8 @@ class Encoding:
         All these parameters should be kept as attributes of the class.
         """
         self.window = "gaussian"
-        self.size = 500 #128 samples  voire 500
-        self.overlap = 400   #32 voire 400
+        self.size = 500 #128 samples  voire 500 car marche mieux
+        self.overlap = 400   #32 voire 400 car marche mieux
 
 
         
@@ -90,26 +90,30 @@ class Encoding:
         self.s = s
         self.freq, self.times, self.spectre = spectrogram(s, fs, noverlap = self.overlap, window=(self.window, self.size), nperseg = self.size)
         u=self.spectre.reshape((self.spectre.shape[0]*self.spectre.shape[1]))
-        idx=np.flip(u.argsort())
-        f=u[idx]**2
-        nrj=np.sum(f)
-        cumul = np.cumsum(f)
-        u[idx[cumul>0.9*nrj]]=0
-      #   print(np.sum(u**2)/nrj) #bien 0.9
+        #on essaie maintenant de ne garder que les coef correspondant à 90% de l'énergie
+        idx=np.flip(u.argsort())  
+        f=u[idx]**2       #la liste ordonnée des énergies, par ordre décroissant
+        nrj=np.sum(f)     #nrj totale du signal            
+        cumul = np.cumsum(f)       #nrj cumulée jusque là (si [1,2,3] renvoie [1,3,8])
+        u[idx[cumul>0.9*nrj]]=0     #met à 0 tous les coefficients qui sont pas nécessaires pour atteindre 90%
+      #   print(np.sum(u**2)/nrj) #bien 0.9 donc on a bien gardé 90% de l'énergie du signal
       #   print(np.sum(u!=0))  #beaucoup plus court qu'avant
         u=u.reshape((self.spectre.shape[0],self.spectre.shape[1]))
-        self.spectre=u
-        self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 40, exclude_border=False).T  #50 ou 5
+        self.spectre = u   #u est la matrice à 2 dim fréquence (ordonnée) temps (abscisses) où apparaissent les coefficients correspondant à 90% de l'énergie
+        self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 50, exclude_border=False).T  #50 ou 5 pour min distance? à déterminer
         
-#50 pour delta t et delta f
+#50 pour delta t et delta f, proposé par Xavier et Boris
 #les delta du hash doivent être déterminés par nous même, pour qu'ils soient optimaux
 
     def display_spectrogram(self):
-      plt.scatter( self.times[self.col], self.freq[self.lign], s=2)
+      plt.scatter(self.times[self.col], self.freq[self.lign], s=2)
       plt.show()
       """
         Display the spectrogram of the audio signal
         """
+    def processsuit():
+       hash = np.zeros()   #il faut que pour chacune des ancres(ti,fi) on lui associe l'ensemble des points vérifiant ce qu'ils disent
+                           #pour le hash, 3 grandeurs à chaque fois
 
 # ----------------------------------------------------------------------------
 # Compares two set of hashes in order to determine if two audio files match
