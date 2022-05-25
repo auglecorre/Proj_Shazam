@@ -45,5 +45,3 @@ if __name__ == '__main__':
     with open('songs.pickle', 'wb') as handle:
         for lign in handle :
             print(lign)
-    
-
