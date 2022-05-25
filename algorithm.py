@@ -47,7 +47,7 @@ class Encoding:
         """
         self.window = "gaussian"
         self.size = 500 #128 samples  voire 500 car marche mieux
-        self.overlap = 400   #32 voire 400 car marche mieux
+        self.overlap = 32   #32 voire 400 car marche mieux
 
 
         
@@ -100,6 +100,7 @@ class Encoding:
       #   print(np.sum(u!=0))  #beaucoup plus court qu'avant
         u=u.reshape((self.spectre.shape[0],self.spectre.shape[1]))
         self.spectre = u   #u est la matrice à 2 dim fréquence (ordonnée) temps (abscisses) où apparaissent les coefficients correspondant à 90% de l'énergie
+        self.m = peak_local_max(np.abs(self.spectre), min_distance = 50, exclude_border=False) #matrice de taille (n,2) ou les lignes sont les coordonnees (f,t) 
         self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 50, exclude_border=False).T  #50 ou 5 pour min distance? à déterminer
         
 #50 pour delta t et delta f, proposé par Xavier et Boris
@@ -111,9 +112,22 @@ class Encoding:
       """
         Display the spectrogram of the audio signal
         """
-    def processsuit():
-       hash = np.zeros()   #il faut que pour chacune des ancres(ti,fi) on lui associe l'ensemble des points vérifiant ce qu'ils disent
+    def processsuit(self):
+       self.hash = []   #il faut que pour chacune des ancres(ti,fi) on lui associe l'ensemble des points vérifiant ce qu'ils disent
                            #pour le hash, 3 grandeurs à chaque fois
+       nb_anchor = int(len(self.lign)/10) #on prend un point ancre tout les dix points
+       delta_t = 5*min(self.col)
+       delta_f = 5*min(self.lign)
+       for k in range(nb_anchor) :
+          t_a, f_a = np.array([np.random(self.col),np.random(self.lign) ]) #c_a=(t_a,f_a)
+          for coord in self.m : #attention coord = (f,t) ici
+             f_i, t_i = coord[0], coord[1]
+             if 0 < t_i - t_a < delta_t and np.abs(f_i - f_a) < delta_f :
+                v_ia = np.array([t_i - t_a, f_a, f_i ])
+                self.hash.append({"t" : t_a, "hash" : v_ia })
+      return(self.hash)
+
+
 
 # ----------------------------------------------------------------------------
 # Compares two set of hashes in order to determine if two audio files match
@@ -187,7 +201,8 @@ class Matching:
 
         self.hashes1 = hashes1
         self.hashes2 = hashes2
-
+        self.matching
+        self.offset 
         # Insert code here
 
              
@@ -220,8 +235,4 @@ if __name__ == '__main__':
     fs, s = read('./samples/Lucid Haze - Amulets.wav')
     encoder.process(fs, s[:])   #900000
     encoder.display_spectrogram() #display_anchors=True
-
-
-
-
 
