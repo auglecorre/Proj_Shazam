@@ -119,13 +119,14 @@ class Encoding:
        delta_t = 5*min(self.col)
        delta_f = 5*min(self.lign)
        for k in range(nb_anchor) :
-          t_a, f_a = np.array([np.random(self.col),np.random(self.lign) ]) #c_a=(t_a,f_a)
+          i_a = np.random.randint(len(self.col)) #on choisi au hazard un point anchor
+          t_a, f_a = np.array([self.col[i_a], self.lign[i_a] ]) #c_a=(t_a,f_a)
           for coord in self.m : #attention coord = (f,t) ici
              f_i, t_i = coord[0], coord[1]
              if 0 < t_i - t_a < delta_t and np.abs(f_i - f_a) < delta_f :
                 v_ia = np.array([t_i - t_a, f_a, f_i ])
                 self.hash.append({"t" : t_a, "hash" : v_ia })
-      return(self.hash)
+       return(self.hash)
 
 
 
@@ -235,4 +236,6 @@ if __name__ == '__main__':
     fs, s = read('./samples/Lucid Haze - Amulets.wav')
     encoder.process(fs, s[:])   #900000
     encoder.display_spectrogram() #display_anchors=True
+    hash = encoder.processsuit()
+    print(hash)
 
