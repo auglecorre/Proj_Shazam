@@ -36,7 +36,7 @@ if __name__ == '__main__':
         fs, s = read('./samples/' + item) 
         encoder.process(fs, s[:]) 
         hash = encoder.processsuit()
-        database.append(hash)
+        database.append({'song': item, 'hashcodes' : hash})
 
     # 4: Save the database
     with open('songs.pickle', 'wb') as handle:
