@@ -42,6 +42,3 @@ if __name__ == '__main__':
     with open('songs.pickle', 'wb') as handle:
         pickle.dump(database, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-    with open('songs.pickle', 'wb') as handle:
-        for lign in handle :
-            print(lign)

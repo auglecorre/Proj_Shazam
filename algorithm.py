@@ -202,9 +202,19 @@ class Matching:
 
         self.hashes1 = hashes1
         self.hashes2 = hashes2
-        self.matching
-        self.offset 
-        # Insert code here
+        self.matching = []
+        self.offset = []
+        for d1 in hashes1 : 
+           for d2 in hashes2 :
+              if d1['hash'] == d2['hash'] : 
+                 self.matching.append([d1['t'], d2['t']])
+                 #self.offset.append(np.abs(d1['t']- d2['t'])) #l'offset correspond au décalage de temps entre deux matchs ? ou entre les deux chanson ? 
+        for i in len(self.matching) :
+           delta_t = np.abs(self.matching[i+1][0] - self.matching[i][0]) #ou [i][1] et [i+1][1]
+           self.offset.append(delta_t)
+        self.matching = np.array(self.matching)
+        self.offset = np.array(self.offset)
+
 
              
     def display_scatterplot(self):
@@ -213,8 +223,11 @@ class Matching:
         Display through a scatterplot the times associated to the hashes
         that match
         """
-    
-        # Insert code here
+        X = np.array([self.matching[k][0] for k in range(len(self.matching))])
+        Y = np.array([self.matching[k][1] for k in range(len(self.matching))])
+        plt.scatter(X,Y)
+        plt.title ("scatterplot of the times associated to the hashes matching")
+        plt.show()
 
 
     def display_histogram(self):
@@ -223,18 +236,32 @@ class Matching:
         Display the offset histogram
         """
 
-        # Insert code here
+        plt.histogram(self.offset)
+        plt.title("Offset histogram")
+        plt.show()
 
 
 
 # ----------------------------------------------
 # Run the script
 # ----------------------------------------------
-if __name__ == '__main__':
+'''if __name__ == '__main__':
 
     encoder = Encoding()
     fs, s = read('./samples/Lucid Haze - Amulets.wav')
     encoder.process(fs, s[:])   #900000
     encoder.display_spectrogram() #display_anchors=True
-    hash = encoder.processsuit()
+    hash = encoder.processsuit()'''
+
+if __name__ == '__main__': 
+
+    encoder = Encoding()
+    fs1, s1 = read('./samples/Lucid Haze - Amulets.wav') 
+    fs2, s2 = read('./samples/Frisk - Au.Ra.wav')  #on compare le morceau avec un autre 
+    encoder.process(fs1, s1[:]) 
+    encoder.process(fs2, s2[:])  
+    hash1 = encoder.processsuit()
+    hash2 = encoder.processsuit()
+    matching = Matching(hash1, hash2)
+    matching.display_scatterplot()
 
