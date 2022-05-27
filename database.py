@@ -35,7 +35,7 @@ if __name__ == '__main__':
     for item in audiofiles :
         fs, s = read('./samples/' + item) 
         encoder.process(fs, s[:]) 
-        hash = encoder.processsuit()
+        hash = encoder.hash
         database.append({'song': item, 'hashcodes' : hash})
 
     # 4: Save the database
