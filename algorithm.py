@@ -29,8 +29,8 @@ class Encoding:
         All these parameters should be kept as attributes of the class.
         """
         self.window = "gaussian"
-        self.size = 500 #128 samples  voire 500 car marche mieux
-        self.overlap = 32   #32 voire 400 car marche mieux
+        self.size = 400 #128 samples  voire 500 car marche mieux
+        self.overlap = 300   #32 voire 400 car marche mieux
 
     def process(self, fs, s):
 
@@ -62,23 +62,22 @@ class Encoding:
         self.s = s
         self.freq, self.times, self.spectre = spectrogram(s, fs, noverlap = self.overlap, window=(self.window, self.size), nperseg = self.size)
         u=self.spectre.reshape((self.spectre.shape[0]*self.spectre.shape[1]))
-        #on essaie maintenant de ne garder que les coef correspondant à 90% de l'énergie
+        #on va maintenant ne garder que les coef correspondant à 90% de l'énergie
         idx=np.flip(u.argsort())  
         f=u[idx]**2       #la liste ordonnée des énergies, par ordre décroissant
-        nrj=np.sum(f)     #nrj totale du signal            
+        nrj=np.sum(f)     #nrj totale du signal
         cumul = np.cumsum(f)       #nrj cumulée jusque là (si [1,2,3] renvoie [1,3,8])
         u[idx[cumul>0.9*nrj]]=0     #met à 0 tous les coefficients qui sont pas nécessaires pour atteindre 90%
       #   print(np.sum(u**2)/nrj) #bien 0.9 donc on a bien gardé 90% de l'énergie du signal
-      #   print(np.sum(u!=0))  #beaucoup plus court qu'avant
+      #   print(np.sum(u!=0), len(u)) #beaucoup plus court qu'avant
         u=u.reshape((self.spectre.shape[0],self.spectre.shape[1]))
         self.spectre = u   #u est la matrice à 2 dim fréquence (ordonnée) temps (abscisses) où apparaissent les coefficients correspondant à 90% de l'énergie
-        self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 100, exclude_border=False).T
+        self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 70, exclude_border=False).T
         print(len(self.lign))
-
-
+           
         self.hash = []
-        deltaf = 1000 #de 1000 à 5000 hz selon prof
-        deltat = 1  #de 1 à 2 s
+        deltaf = 50 #de 1000 à 5000 hz 
+        deltat = 5 #de 1 à 2 s
         for ancre in range(len(self.lign)):
            t_a, f_a = self.times[self.col[ancre]], self.freq[self.lign[ancre]]
            for i in range(len(self.lign)):
@@ -122,9 +121,6 @@ class Matching:
         based on the histogram that allows to determine if both audio files 
         match
 
-        Parameters
-        ----------
-
         hashes1: list of dictionaries
            hashes extracted as fingerprint for the first audiofile. Each hash 
            is represented by a dictionary containing the time associated to
@@ -164,11 +160,12 @@ if __name__ == '__main__':
     encoder2 = Encoding()
     extr = Encoding()
     fs1, s1 = read('./samples/Jal - Edge of Water - Aakash Gandhi.wav') 
-   #  encoder1.process(fs1, s1[:])    
+    encoder1.process(fs1, s1[:]) 
+    encoder1.display_spectrogram()   
     fs2, s2 = read('./samples/Frisk - Au.Ra.wav')  #on compare le morceau avec un autre 
-   #  encoder2.process(fs2, s2[:]) 
-   #  extr.process(fs2, s2[1000000:2000000] )
-   #  matching = Matching(encoder2.hash, extr.hash)
-   #  matching.display_scatterplot()
-   #  matching.display_histogram()
-
+    encoder2.process(fs2, s2[:]) 
+   #  encoder2.display_spectrogram()
+    extr.process(fs2, s2[:720000] )
+    matching = Matching(encoder1.hash, extr.hash)
+    matching.display_scatterplot()
+    matching.display_histogram()
