@@ -29,8 +29,8 @@ class Encoding:
         All these parameters should be kept as attributes of the class.
         """
         self.window = "gaussian"
-        self.size = 400 #128 samples  voire 500 car marche mieux
-        self.overlap = 300   #32 voire 400 car marche mieux
+        self.size = 500 #128 samples  voire 500 car marche mieux
+        self.overlap = 400   #32 voire 400 car marche mieux
 
     def process(self, fs, s):
 
@@ -71,13 +71,15 @@ class Encoding:
       #   print(np.sum(u**2)/nrj) #bien 0.9 donc on a bien gardé 90% de l'énergie du signal
       #   print(np.sum(u!=0), len(u)) #beaucoup plus court qu'avant
         u=u.reshape((self.spectre.shape[0],self.spectre.shape[1]))
+      #   print(len(s)*10**-4)
         self.spectre = u   #u est la matrice à 2 dim fréquence (ordonnée) temps (abscisses) où apparaissent les coefficients correspondant à 90% de l'énergie
-        self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 70, exclude_border=False).T
+        self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 30, num_peaks = int(len(s)*(10**-4)),
+          exclude_border=False).T #on garde un nombre de pics proportionnel à longueur de l'extrait, et de sorte à avoir quelques milliers de pics pour un morceau
         print(len(self.lign))
            
         self.hash = []
-        deltaf = 50 #de 1000 à 5000 hz 
-        deltat = 5 #de 1 à 2 s
+        deltaf = 1000 #de 1000 à 5000 hz 
+        deltat = 1 #de 1 à 2 s
         for ancre in range(len(self.lign)):
            t_a, f_a = self.times[self.col[ancre]], self.freq[self.lign[ancre]]
            for i in range(len(self.lign)):
@@ -87,7 +89,6 @@ class Encoding:
                     v_ia = np.array([t_i - t_a, f_a, f_i ])
                     self.hash.append({"t" : t_a, "hash" : v_ia })
         print(f'morceau a {len(self.hash)}') 
-        return(self.hash)
                      
     def display_spectrogram(self): #spectrogramme du signal audio
       plt.scatter(self.times[self.col], self.freq[self.lign], s=2)
@@ -134,13 +135,14 @@ class Matching:
         self.hashes2 = hashes2
         self.matching = []
         self.offset = []
+        print(len(hashes1),len(hashes2))
 
         for d1 in hashes1 : #morceau
-           for d2 in hashes2 :  #extrait
-              if d1['hash'].all() == d2['hash'].all() : 
+           for d2 in hashes2 :  #extrait 
+              if (d1['hash'] == d2['hash']).all():
+            #   if d1['hash'][0] == d2['hash'][0] and d1['hash'][1] == d2['hash'][1] and d1['hash'][2] == d2['hash'][2] : #moche mais simple
                  self.matching.append([d1['t'], d2['t']])
                  self.offset.append(d1['t']- d2['t'])
-        print(len(self.matching))
 
     def display_scatterplot(self):
         X = np.array([self.matching[k][0] for k in range(len(self.matching))])
@@ -159,13 +161,13 @@ if __name__ == '__main__':
     encoder1 = Encoding()
     encoder2 = Encoding()
     extr = Encoding()
-    fs1, s1 = read('./samples/Jal - Edge of Water - Aakash Gandhi.wav') 
-    encoder1.process(fs1, s1[:]) 
-    encoder1.display_spectrogram()   
-    fs2, s2 = read('./samples/Frisk - Au.Ra.wav')  #on compare le morceau avec un autre 
+   #  fs1, s1 = read('./samples/Cash Machine - Anno Domini Beats.wav') 
+   #  encoder1.process(fs1, s1[:]) 
+   #  encoder1.display_spectrogram()   
+    fs2, s2 = read('./samples/Lightfoot - Aaron Lieberman.wav')  #on compare le morceau avec un autre 
     encoder2.process(fs2, s2[:]) 
    #  encoder2.display_spectrogram()
-    extr.process(fs2, s2[:720000] )
-    matching = Matching(encoder1.hash, extr.hash)
+    extr.process(fs2, s2[:1000000] )
+    matching = Matching(encoder2.hash, extr.hash)
     matching.display_scatterplot()
     matching.display_histogram()
