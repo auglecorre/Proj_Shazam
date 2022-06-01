@@ -75,7 +75,7 @@ class Encoding:
         self.spectre = u   #u est la matrice à 2 dim fréquence (ordonnée) temps (abscisses) où apparaissent les coefficients correspondant à 90% de l'énergie
         self.lign, self.col = peak_local_max(np.abs(self.spectre), min_distance = 30, num_peaks = int(len(s)*(10**-4)),
           exclude_border=False).T #on garde un nombre de pics proportionnel à longueur de l'extrait, et de sorte à avoir quelques milliers de pics pour un morceau
-        print(len(self.lign))
+      #   print(len(self.lign))
            
         self.hash = []
         deltaf = 1000 #de 1000 à 5000 hz 
@@ -88,7 +88,7 @@ class Encoding:
                  if 0 < abs(t_i - t_a) < deltat and abs(f_i - f_a) < deltaf:
                     v_ia = np.array([t_i - t_a, f_a, f_i ])
                     self.hash.append({"t" : t_a, "hash" : v_ia })
-        print(f'morceau a {len(self.hash)}') 
+      #   print(f'morceau a {len(self.hash)}') 
                      
     def display_spectrogram(self): #spectrogramme du signal audio
       plt.scatter(self.times[self.col], self.freq[self.lign], s=2)
@@ -135,12 +135,9 @@ class Matching:
         self.hashes2 = hashes2
         self.matching = []
         self.offset = []
-        print(len(hashes1),len(hashes2))
-
         for d1 in hashes1 : #morceau
            for d2 in hashes2 :  #extrait 
               if (d1['hash'] == d2['hash']).all():
-            #   if d1['hash'][0] == d2['hash'][0] and d1['hash'][1] == d2['hash'][1] and d1['hash'][2] == d2['hash'][2] : #moche mais simple
                  self.matching.append([d1['t'], d2['t']])
                  self.offset.append(d1['t']- d2['t'])
 
@@ -151,9 +148,9 @@ class Matching:
         plt.title ("scatterplot of the times associated to the hashes matching")
         plt.show()
 
-    def display_histogram(self): #display l'histo des offsets
+    def display_histogram(self, nom = None): #display l'histo des offsets
         plt.hist(self.offset, bins= 200)
-        plt.title("Offset histogram")
+        plt.title(f'Offset histogram {nom}')
         plt.show()
 
 
@@ -161,13 +158,13 @@ if __name__ == '__main__':
     encoder1 = Encoding()
     encoder2 = Encoding()
     extr = Encoding()
-   #  fs1, s1 = read('./samples/Cash Machine - Anno Domini Beats.wav') 
-   #  encoder1.process(fs1, s1[:]) 
+    fs1, s1 = read('./samples/Cash Machine - Anno Domini Beats.wav') 
+    encoder1.process(fs1, s1[:]) 
    #  encoder1.display_spectrogram()   
     fs2, s2 = read('./samples/Lightfoot - Aaron Lieberman.wav')  #on compare le morceau avec un autre 
     encoder2.process(fs2, s2[:]) 
    #  encoder2.display_spectrogram()
-    extr.process(fs2, s2[:1000000] )
-    matching = Matching(encoder2.hash, extr.hash)
+    extr.process(fs2, s2[1000000:1720000] )
+    matching = Matching(encoder1.hash, extr.hash)
     matching.display_scatterplot()
     matching.display_histogram()

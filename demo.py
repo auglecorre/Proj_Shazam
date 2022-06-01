@@ -20,6 +20,8 @@ if __name__ == '__main__':
 
     # 2: Create an instance of the class Encoder
     # Insert code here
+    encoder = Encoding()
+    
 
     # 3: Randomly get an extract from one of the songs of the database
     songs = [item for item in os.listdir('./samples') if item[:-4] != '.wav']
@@ -33,11 +35,13 @@ if __name__ == '__main__':
 
     # 4: Use the encoder to extract a fingerprint of the sample
     encoder.process(fs, s[tmin:tmin + duration])
-    hashes = encoder.hashes
+    hashes = encoder.hash
 
     # 5: Using the class Matching, compare the fingerprint to all the 
     # fingerprints in the database
-
+    for morceau in database:
+        matching = Matching(morceau['hashcodes'],hashes)
+        matching.display_histogram(nom = morceau['song'])
     # Insert code here
 
 
