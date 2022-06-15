@@ -79,7 +79,7 @@ class Encoding:
            
         self.hash = []
         deltaf = 1000 #de 1000 à 5000 hz 
-        deltat = 1 #de 1 à 2 s
+        deltat = 0.25 #de 1 à 2 s
         for ancre in range(len(self.lign)):
            t_a, f_a = self.times[self.col[ancre]], self.freq[self.lign[ancre]]
            for i in range(len(self.lign)):
@@ -158,13 +158,23 @@ if __name__ == '__main__':
     encoder1 = Encoding()
     encoder2 = Encoding()
     extr = Encoding()
-    fs1, s1 = read('./samples/Cash Machine - Anno Domini Beats.wav') 
+
+    fs1, s1 = read('./samples/Frisk - Au.Ra.wav') 
     encoder1.process(fs1, s1[:]) 
+
    #  encoder1.display_spectrogram()   
-    fs2, s2 = read('./samples/Lightfoot - Aaron Lieberman.wav')  #on compare le morceau avec un autre 
-    encoder2.process(fs2, s2[:]) 
+   #  fs2, s2 = read('./samples/Dark Alley Deals - Aaron Kenny.wav')  #on compare le morceau avec un autre 
+   #  encoder2.process(fs2, s2[:]) 
+   
    #  encoder2.display_spectrogram()
-    extr.process(fs2, s2[1000000:1720000] )
-    matching = Matching(encoder1.hash, extr.hash)
-    matching.display_scatterplot()
-    matching.display_histogram()
+   #  extr.process(fs1, s1[1000000:1720000] )
+
+   #when it matches
+    matching1 = Matching(encoder1.hash, extr.hash)
+    matching1.display_scatterplot()
+    matching1.display_histogram()
+
+   #when it doesn't match
+   #  matching2 = Matching(encoder2.hash, extr.hash)
+   #  matching2.display_scatterplot()
+   #  matching2.display_histogram()

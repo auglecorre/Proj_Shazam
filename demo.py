@@ -5,7 +5,8 @@ import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-
+from collections import Counter
+from time import time
 from scipy.io.wavfile import read
 from algorithm import *
 
@@ -13,36 +14,39 @@ from algorithm import *
 # Run the script
 # ----------------------------------------------
 if __name__ == '__main__':
-
-    # 1: Load the database
+    tours = 100
     with open('songs.pickle', 'rb') as handle:
         database = pickle.load(handle)
+    f=0
+    temps = time()
+    for i in range(tours):
+        encoder = Encoding()
+        
+        songs = [item for item in os.listdir('./samples') if item[:-4] != '.wav']
+        song = random.choice(songs)
+        # print('Selected song: ' + song[:-4])
+        filename = './samples/' + song
 
-    # 2: Create an instance of the class Encoder
-    # Insert code here
-    encoder = Encoding()
-    
+        fs, s = read(filename)
+        tmin = int(50*fs) # We select an extract starting at 50s ...
+        duration = int(10*fs) # ... which lasts 10s
 
-    # 3: Randomly get an extract from one of the songs of the database
-    songs = [item for item in os.listdir('./samples') if item[:-4] != '.wav']
-    song = random.choice(songs)
-    print('Selected song: ' + song[:-4])
-    filename = './samples/' + song
+        encoder.process(fs, s[tmin:tmin + duration])
+        hashes = encoder.hash
 
-    fs, s = read(filename)
-    tmin = int(50*fs) # We select an extract starting at 50s ...
-    duration = int(10*fs) # ... which lasts 10s
-
-    # 4: Use the encoder to extract a fingerprint of the sample
-    encoder.process(fs, s[tmin:tmin + duration])
-    hashes = encoder.hash
-
-    # 5: Using the class Matching, compare the fingerprint to all the 
-    # fingerprints in the database
-    for morceau in database:
-        matching = Matching(morceau['hashcodes'],hashes)
-        matching.display_histogram(nom = morceau['song'])
-    # Insert code here
+        m=0
+        for morceau in database:
+            matching = Matching(morceau['hashcodes'],hashes)
+            # matching.display_histogram(nom = morceau['song'])
+            if matching.offset != [] :
+                test = Counter(matching.offset).most_common(1)[0][1]
+                if test > m :
+                    m = test
+                    morcea = morceau['song']
+        if morcea == song :
+            f+=1
+    print(f"L'algorithme a correctement reconnu {f}/{tours} échantillons en un temps moyen de {(time() - temps)/tours} secondes par échantillon")
+        # print(morcea==song)
 
 
 
