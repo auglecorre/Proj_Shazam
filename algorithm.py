@@ -159,10 +159,10 @@ if __name__ == '__main__':
     encoder2 = Encoding()
     extr = Encoding()
 
-    fs1, s1 = read('./samples/Frisk - Au.Ra.wav') 
-    encoder1.process(fs1, s1[:]) 
-
-   #  encoder1.display_spectrogram()   
+   #  fs1, s1 = read('./samples/Frisk - Au.Ra.wav') 
+   #  encoder1.process(fs1, s1[:]) 
+   #  encoder1.display_spectrogram()  
+   #  
    #  fs2, s2 = read('./samples/Dark Alley Deals - Aaron Kenny.wav')  #on compare le morceau avec un autre 
    #  encoder2.process(fs2, s2[:]) 
    
@@ -170,9 +170,9 @@ if __name__ == '__main__':
    #  extr.process(fs1, s1[1000000:1720000] )
 
    #when it matches
-    matching1 = Matching(encoder1.hash, extr.hash)
-    matching1.display_scatterplot()
-    matching1.display_histogram()
+   #  matching1 = Matching(encoder1.hash, extr.hash)
+   #  matching1.display_scatterplot()
+   #  matching1.display_histogram()
 
    #when it doesn't match
    #  matching2 = Matching(encoder2.hash, extr.hash)
